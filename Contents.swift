@@ -1,6 +1,9 @@
 import Cocoa
 import Darwin
 
+/**
+ cmd + shift + enter ==> run the playgroud
+ */
 func print_title(title: String) -> Void
 {
     print("\n")
@@ -409,7 +412,7 @@ let sideLength = optionalSquare?.sideLength
 
 print_title(title: "枚举和结构体")
 enum Rank: Int {
-    case ace = 1
+    case ace = 1 // 你也可以使用字符串或者浮点数作为枚举的原始值。# 真的可以吗? 枚举在这里，和结构体， 和类的区别， 越来越小了
     case two, three, four, five, six, seven, eight, nine, ten
     case jack, queen, king
     func simpleDescription() -> String {
@@ -428,4 +431,78 @@ enum Rank: Int {
     }
 }
 let ace = Rank.ace
-let aceRawValue = ace.rawValue
+let aceRawValue = ace.rawValue // rawValue 看着也是个语法糖
+print(ace, aceRawValue)
+
+
+print_subTitle(sub: "枚举值创建")
+// init?(rawValue:)
+if let convertedRank = Rank(rawValue: 3) {
+    let threeDescription = convertedRank.simpleDescription()
+    print(threeDescription)
+}
+
+
+// 枚举值是实际值，并不是原始值的另一种表达方法。
+enum Suit {
+    case spades, hearts, diamonds, clubs
+    func simpleDescription() -> String {
+        switch self { // 在 switch 里，枚举成员使用缩写 .hearts 来引用，因为 self 的值已经是一个 suit 类型。在任何已知变量类型的情况下都可以使用缩写。
+        case .spades:
+            return "spades"
+        case .hearts:
+            return "hearts"
+        case .diamonds:
+            return "diamonds"
+        case .clubs:
+            return "clubs"
+        }
+    }
+}
+let hearts = Suit.hearts
+let heartsDescription = hearts.simpleDescription()
+print(heartsDescription)
+
+//
+enum ServerResponse {
+    case result(String, String)
+    case failure(String)
+}
+
+let success = ServerResponse.result("6:00 am", "8:09 pm")
+let failure = ServerResponse.failure("Out of cheese.")
+
+switch success {
+case let .result(sunrise, sunset): // 这也可以啊.. sunrise， sunset 是局部变量， 什么奇怪语法糖
+    print("Sunrise is at \(sunrise) and sunset is at \(sunset)")
+case let .failure(message):
+    print("Failure...  \(message)")
+}
+
+
+print_subTitle(sub: "结构体")
+// 使用 struct 来创建一个结构体。结构体和类有很多相同的地方，包括方法和构造器。它们之间最大的一个区别就是结构体是传值，类是传引用。
+struct Card {
+    var rank: Rank
+    var suit: Suit
+    func simpleDescription() -> String {
+        return "The \(rank.simpleDescription()) of \(suit.simpleDescription())"
+    }
+}
+let threeOfSpades = Card(rank: .three, suit: .spades)
+let threeOfSpadesDescription = threeOfSpades.simpleDescription()
+print(threeOfSpadesDescription)
+
+
+print_title(title: "协议和扩展")
+
+protocol ExampleProtocol {
+    var simpleDescription: String { get }
+    mutating func adjust()
+}
+
+
+
+
+
+
