@@ -497,12 +497,159 @@ print(threeOfSpadesDescription)
 print_title(title: "协议和扩展")
 
 protocol ExampleProtocol {
-    var simpleDescription: String { get }
-    mutating func adjust()
+    var simpleDescription: String { get } // 一个属性， 包含getter 方法
+    mutating func adjust() // mutating 关键字用来标记一个会修改结构体的方法
+}
+
+// 类、枚举和结构体都可以遵循协议。
+print_subTitle(sub: "class extends protocol")
+class SimpleClass: ExampleProtocol {
+    var simpleDescription: String = "A very simple class."
+    var anotherProperty: Int = 69105
+    func adjust() {
+        simpleDescription += "  Now 100% adjusted."
+    }
+}
+
+var aa = SimpleClass()
+aa.adjust()
+let aDescription = aa.simpleDescription
+print(aDescription)
+
+print_subTitle(sub: "struct extends protocol")
+struct SimpleStructure: ExampleProtocol {
+    var simpleDescription: String = "A simple structure"
+    mutating func adjust() {
+        simpleDescription += " (adjusted)"
+    }
+}
+
+var bb = SimpleStructure()
+bb.adjust()
+let bDescription = bb.simpleDescription
+print(bDescription)
+
+print_subTitle(sub: "使用 extension 来为现有的类型Int添加功能") //# 这看着和cateogry是一样的
+extension Int: ExampleProtocol {
+    public var simpleDescription: String {
+        return "The number \(self)"
+    }
+    public mutating func adjust() {
+        self += 42
+    }
+}
+print(7.simpleDescription)
+
+
+print_title(title: "错误处理")
+
+// 自定义异常， 打印机异常， 没纸、没墨水、着火
+enum PrinterError: Error {
+    case outOfPaper
+    case noToner
+    case onFire
+}
+
+func send(job: Int, toPrinter printerName: String) throws -> String {
+    if printerName == "Never Has Toner" {
+        throw PrinterError.noToner // 抛出一个异常
+    }
+    return "Job sent"
 }
 
 
+print_subTitle(sub: "do-catch")
+do {
+//    let printerResponse = try send(job: 1040, toPrinter: "Bi Sheng")
+    let printerResponse = try send(job: 1040, toPrinter: "Never Has Toner")
 
+    print(printerResponse)
+} catch {
+    print(error)
+}
+
+do {
+    let printerResponse = try send(job: 1440, toPrinter: "Gutenberg")
+    print(printerResponse)
+} catch PrinterError.onFire {
+    print("I'll just put this over here, with the rest of the fire.")
+} catch let printerError as PrinterError {
+    print("Printer error: \(printerError).")
+} catch {
+    print(error)
+}
+
+let printerSuccess = try? send(job: 1884, toPrinter: "Mergenthaler")
+let printerFailure = try? send(job: 1885, toPrinter: "Never Has Toner")
+print(printerSuccess ?? "")
+print(printerFailure ?? "")
+
+
+print_subTitle(sub: "defer")
+/**
+ 使用 defer 代码块来表示在函数返回前，函数中最后执行的代码。无论函数是否会抛出错误，这段代码都将执行。使用 defer，可以把函数调用之初就要执行的代码和函数调用结束时的扫尾代码写在一起，虽然这两者的执行时机截然不同。
+ */
+var fridgeIsOpen = false
+let fridgeContent = ["milk", "eggs", "leftovers"]
+
+func fridgeContains(_ food: String) -> Bool {
+    fridgeIsOpen = true
+    defer {
+        fridgeIsOpen = false
+    }
+    
+    let result = fridgeContent.contains(food)
+    return result
+}
+fridgeContains("banana")
+print(fridgeIsOpen)
+
+
+print_title(title: "泛型")
+// 在尖括号里写一个名字来创建一个泛型函数或者类型。
+
+func makeArray<Item>(repeating item: Item, numberOfTimes: Int) -> [Item] {
+    var result: [Item] = [] // 这个Item 应该是会自动推断的， 就是有点奇怪就是了
+    for _ in 0..<numberOfTimes {
+        result.append(item)
+    }
+    return result
+}
+
+let knockArray = makeArray(repeating: "knock", numberOfTimes: 4)
+print(knockArray)
+print(knockArray.first as Any)
+
+// 重新实现 Swift 标准库中的可选类型
+enum OptionalValue<Wrapped> {
+    case none
+    case some(Wrapped) // 说实话这个概念是让我感到困惑的， 不知道是参考的什么语言。
+}
+var possibleInteger: OptionalValue<Int> = .none
+possibleInteger = .some(100)
+
+print(possibleInteger)
+
+
+print_subTitle(sub: "where")
+/**
+ 在类型名后面使用 where 来指定对类型的一系列需求，比如，限定类型实现某一个协议，限定两个类型是相同的，或者限定某个类必须有一个特定的父类。
+ */
+func anyCommonElements<T: Sequence, U: Sequence>(_ lhs: T, _ rhs: U) -> Bool
+    where T.Element: Equatable, T.Element == U.Element // where用来约束范型
+{
+    for lhsItem in lhs { // 两个array中是否有相同的元素
+        for rhsItem in rhs {
+            if lhsItem == rhsItem {
+                return true
+            }
+        }
+    }
+    return false
+}
+let anyCommon = anyCommonElements([1, 2, 3], [3])
+
+print(anyCommon)
 
 
 
